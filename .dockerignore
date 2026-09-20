@@ -1,0 +1,6 @@
+backups/
+scripts/
+.git/
+__pycache__/
+*.pyc
+README.md

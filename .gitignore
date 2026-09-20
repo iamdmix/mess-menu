@@ -1,0 +1,7 @@
+# Live menu data & runtime artifacts — not source, stays local
+menu.json
+backups/
+__pycache__/
+*.pyc
+.DS_Store
+.pytest_cache/

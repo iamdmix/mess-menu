@@ -1,0 +1,19 @@
+services:
+  mess-menu:
+    build: .
+    container_name: mess-menu
+    restart: unless-stopped
+    ports:
+      - "8085:8000"
+    volumes:
+      # Live menu data. scripts/apply_menu.py writes in place (same inode),
+      # and the app re-reads the file on every request.
+      - ./menu.json:/app/menu.json
+    healthcheck:
+      test:
+        ["CMD", "python", "-c",
+         "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
