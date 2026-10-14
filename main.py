@@ -144,6 +144,8 @@ def build_payload(menu: dict, serving_date: dt.date, meal: str) -> dict:
     if items:
         verb = "are" if meal == "snacks" else "is"
         text = f"{day_label}'s {meal} {verb} {items}"
+        if " PLAN: " in text:
+            text = text.replace(" PLAN: ", "\n\nPLAN: ", 1)
     else:
         text = f"{day_label}'s {meal} menu is not available yet"
 
