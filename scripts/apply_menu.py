@@ -82,12 +82,21 @@ def validate(data: dict) -> dict:
             missing = [m for m in MEALS if m not in value]
             if missing:
                 die(f"'{key}' is missing: {', '.join(missing)}")
-            unknown = [k for k in value if k not in set(MEALS) | {"day"}]
+            unknown = [k for k in value if k not in set(MEALS) | {"day", "plan"}]
             if unknown:
                 die(f"'{key}' has unknown keys: {', '.join(unknown)}")
             entry = {m: _clean_text(value[m], f"{key}.{m}") for m in MEALS}
             if "day" in value:
                 entry["day"] = _clean_text(value["day"], f"{key}.day")
+            if "plan" in value:
+                plan = value["plan"]
+                if not isinstance(plan, dict):
+                    die(f"'{key}.plan' must be an object of meal strings")
+                unknown_plan = [k for k in plan if k not in MEALS]
+                if unknown_plan:
+                    die(f"'{key}.plan' has unknown keys: {', '.join(unknown_plan)}")
+                entry["plan"] = {m: _clean_text(plan[m], f"{key}.plan.{m}")
+                                 for m in plan}
             clean[key] = entry
             date_count += 1
         elif key in DAYS:

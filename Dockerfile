@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py nutrition.py menu.json ./
+COPY main.py menu.json ./
 
 EXPOSE 8000
 

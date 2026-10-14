@@ -25,8 +25,6 @@ from pathlib import Path
 import pytz
 from fastapi import FastAPI, HTTPException, Response
 
-from nutrition import build_prompt
-
 IST = pytz.timezone("Asia/Kolkata")
 MENU_PATH = Path(os.environ.get("MENU_PATH", Path(__file__).resolve().parent / "menu.json"))
 
@@ -192,12 +190,11 @@ def get_meal(
 
 @app.get("/plan")
 def get_plan(response: Response, meal: Meal | None = None) -> dict:
-    """/meal payload plus the sports-nutrition prompt for the serving day.
+    """/meal payload with the day's PLAN text appended to ``text``.
 
-    ``text`` keeps the Siri-ready menu sentence (unchanged behaviour, shown
-    to the user first); ``prompt`` carries DATE + the full day's menu JSON
-    + the nutrition rulebook, aimed at the AI step inside the Shortcut
-    whose output appears below the menu.
+    The plan comes from the ``plan`` block in menu.json (per-meal
+    strings); dishes are pre-computed offline, matching the nutrition
+    rules. If a plan line is missing for that meal it's simply omitted.
     """
     response.headers["Cache-Control"] = "no-store"
     menu = load_menu()
@@ -210,7 +207,11 @@ def get_plan(response: Response, meal: Meal | None = None) -> dict:
         meal_name, serving_date = select_meal(now.date(), now)
 
     payload = build_payload(menu, serving_date, meal_name)
+    entry = resolve_entry(menu, serving_date) or {}
+    plan_map = entry.get("plan") or {}
+    plan_text = str(plan_map.get(meal_name, "")).strip()
     payload["date"] = serving_date.isoformat()
-    payload["prompt"] = build_prompt(serving_date, menu.get(serving_date.isoformat()))
-    payload["text"] = payload["text"] + "\n\n" + payload["prompt"]
+    if plan_text:
+        payload["plan"] = plan_text
+        payload["text"] = payload["text"] + " " + plan_text
     return payload
