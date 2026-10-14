@@ -25,6 +25,8 @@ from pathlib import Path
 import pytz
 from fastapi import FastAPI, HTTPException, Response
 
+from nutrition import build_prompt
+
 IST = pytz.timezone("Asia/Kolkata")
 MENU_PATH = Path(os.environ.get("MENU_PATH", Path(__file__).resolve().parent / "menu.json"))
 
@@ -186,3 +188,29 @@ def get_meal(
         meal_name, serving_date = select_meal(now.date(), now)
 
     return build_payload(menu, serving_date, meal_name)
+
+
+@app.get("/plan")
+def get_plan(response: Response, meal: Meal | None = None) -> dict:
+    """/meal payload plus the sports-nutrition prompt for the serving day.
+
+    ``text`` keeps the Siri-ready menu sentence (unchanged behaviour, shown
+    to the user first); ``prompt`` carries DATE + the full day's menu JSON
+    + the nutrition rulebook, aimed at the AI step inside the Shortcut
+    whose output appears below the menu.
+    """
+    response.headers["Cache-Control"] = "no-store"
+    menu = load_menu()
+    now = dt.datetime.now(IST)
+
+    if meal is not None:
+        meal_name = meal.value
+        serving_date = next_meal_date(meal_name, now)
+    else:
+        meal_name, serving_date = select_meal(now.date(), now)
+
+    payload = build_payload(menu, serving_date, meal_name)
+    payload["date"] = serving_date.isoformat()
+    payload["prompt"] = build_prompt(serving_date, menu.get(serving_date.isoformat()))
+    payload["text"] = payload["text"] + "\n\n" + payload["prompt"]
+    return payload
