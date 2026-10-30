@@ -7,7 +7,7 @@
 
 A tiny FastAPI microservice that serves my hostel mess menu on IST
 (Asia/Kolkata) clock logic, publicly at
-**[meal.dharmikshinde.tech/meal](https://meal.dharmikshinde.tech/meal)** — so
+**[meal.dharmikshinde.in/meal](https://meal.dharmikshinde.in/meal)** — so
 Siri, Shortcuts and my dashboard always know what's cooking. Runs on my
 homelab (Intel Mac, OrbStack/Docker), exposed via a Cloudflare Tunnel.
 
@@ -88,7 +88,7 @@ as the fallback when a date isn't covered.
 > The **whole point** of the `text` field. Build this once, never wonder again:
 
 1. Open the **Shortcuts** app → **+** (new shortcut)
-2. Add action → **URL** → paste `https://meal.dharmikshinde.tech/meal`
+2. Add action → **URL** → paste `https://meal.dharmikshinde.in/meal`
 3. Add action → **Get Contents of URL**
 4. Add action → **Get Dictionary Value** → key `text`
 5. Add action → **Speak Text**
